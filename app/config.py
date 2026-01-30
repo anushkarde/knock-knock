@@ -4,9 +4,10 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-# Load .env from project root
+# Load .env: cwd first, then project root with override so project .env wins over shell/cwd
 _env_path = Path(__file__).resolve().parent.parent / ".env"
-load_dotenv(_env_path)
+load_dotenv()
+load_dotenv(_env_path, override=True)
 
 
 def _str(key: str, default: str = "") -> str:
@@ -27,6 +28,7 @@ DATABASE_URL = _str("DATABASE_URL") or "sqlite:///./doorbell.db"
 
 # Angi webhook
 ANGI_API_KEY = _str("ANGI_API_KEY")
+
 
 # SendGrid (optional)
 SENDGRID_API_KEY = _str("SENDGRID_API_KEY")

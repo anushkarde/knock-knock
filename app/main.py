@@ -1,6 +1,7 @@
 """FastAPI app and routes for Knock Knock."""
 import json
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Depends, Header, HTTPException, Request
 from fastapi.responses import PlainTextResponse
@@ -12,10 +13,25 @@ from app.schemas import AngiLeadWebhookPayload
 from app.services import process_angi_lead
 from app.seed import seed_demo_data
 
+# #region agent log
+def _debug_log(message: str, data: dict) -> None:
+    _base = Path(__file__).resolve().parent.parent
+    _path = _base / ".cursor" / "debug.log"
+    try:
+        _path.parent.mkdir(parents=True, exist_ok=True)
+        with open(_path, "a") as f:
+            f.write(json.dumps({"message": message, "data": data}) + "\n")
+    except Exception:
+        pass
+# #endregion
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Create tables and seed demo data on startup."""
+    # #region agent log
+    _debug_log("startup", {"ANGI_API_KEY_set": bool(ANGI_API_KEY), "ANGI_API_KEY_len": len(ANGI_API_KEY) if ANGI_API_KEY else 0})
+    # #endregion
     init_db()
     db = SessionLocal()
     try:
@@ -34,9 +50,28 @@ app = FastAPI(
 )
 
 
-def verify_angi_api_key(x_api_key: str | None = Header(None, alias="X-API-KEY")) -> None:
-    """Require X-API-KEY header to match ANGI_API_KEY."""
-    if not ANGI_API_KEY or x_api_key != ANGI_API_KEY:
+async def verify_angi_api_key(
+    request: Request,
+    x_api_key: str | None = Header(None, alias="X-API-KEY"),
+) -> None:
+    """Require X-API-KEY header (or api_key query param) to match ANGI_API_KEY."""
+    # Header first; fallback to query param (some proxies e.g. ngrok strip custom headers)
+    key_from_header = (x_api_key.strip() if x_api_key else None) or None
+    key_from_query = request.query_params.get("api_key")
+    supplied_key = key_from_header or (key_from_query.strip() if key_from_query else None) or None
+    # #region agent log
+    _debug_log("verify_angi_api_key", {
+        "hypothesisId": "H1",
+        "sessionId": "debug",
+        "runId": "post-fix",
+        "ANGI_API_KEY_set": bool(ANGI_API_KEY),
+        "ANGI_API_KEY_len": len(ANGI_API_KEY) if ANGI_API_KEY else 0,
+        "x_api_key_is_None": key_from_header is None,
+        "supplied_key_len": len(supplied_key) if supplied_key else 0,
+        "keys_match": bool(ANGI_API_KEY and supplied_key is not None and supplied_key == ANGI_API_KEY),
+    })
+    # #endregion
+    if not ANGI_API_KEY or supplied_key != ANGI_API_KEY:
         raise HTTPException(status_code=401, detail="Invalid or missing API key")
 
 
