@@ -55,14 +55,25 @@ To receive Angi webhooks locally:
 
 ---
 
+## To test the webhook
+
+1. You will receive an **ngrok link** (e.g. `https://abc123.ngrok-free.app`) from me.
+2. **Open that link in your browser.** You’ll see a short instructions page and a **copy-paste curl** with the URL already filled in.
+3. Replace `YOUR_API_KEY` in the curl with the API key the host gives you.
+4. Run the curl in your terminal. You should get `200` and `<success>ok</success>`.
+
+You can also use the same link + `/docs` for Swagger UI.
+
+---
+
 ## Example curl (Angi lead webhook)
 
 ```bash
 curl -X POST http://127.0.0.1:8000/webhooks/angi/leads \
   -H "Content-Type: application/json" \
-  -H "X-API-KEY: your-angi-webhook-api-key" \
+  -H "X-API-KEY: knock-knock-key" \
   -d '{
-    "CorrelationId": "lead-001",
+    "CorrelationId": "lead-001234567",
     "ALAccountId": "123456",
     "Email": "customer@example.com",
     "PhoneNumber": "+15551234567",

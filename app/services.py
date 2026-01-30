@@ -35,7 +35,7 @@ def _find_tenant_for_al_account(db: Session, al_account_id: Optional[str]) -> Te
         )
         if mapping:
             return db.query(Tenant).filter(Tenant.id == mapping.tenant_id).first()
-    default = db.query(Tenant).filter(Tenant.name == "tenant_default").first()
+    default = db.query(Tenant).filter(Tenant.id == "tenant_default").first()
     if default:
         return default
     raise RuntimeError("tenant_default not found; run seed_demo_data first")
@@ -110,7 +110,7 @@ def process_angi_lead(
 
     # 2) Tenant mapping
     tenant = _find_tenant_for_al_account(db, payload.ALAccountId)
-    used_default_tenant = tenant.name == "tenant_default"
+    used_default_tenant = tenant.id == "tenant_default"
     if used_default_tenant:
         logger.info(
             "angi_mapping missing for ALAccountId=%s; using tenant_default",
