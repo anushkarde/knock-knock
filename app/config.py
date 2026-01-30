@@ -14,6 +14,22 @@ def _str(key: str, default: str = "") -> str:
     return os.environ.get(key, default).strip()
 
 
+def _angi_api_key_from_project_env() -> str:
+    """Read ANGI_API_KEY from project .env so it wins over shell env (e.g. 25-char key elsewhere)."""
+    if not _env_path.exists():
+        return ""
+    try:
+        text = _env_path.read_text()
+        for line in text.splitlines():
+            line = line.strip()
+            if line.startswith("ANGI_API_KEY=") and not line.startswith("ANGI_API_KEY=#"):
+                val = line.split("=", 1)[1].strip().strip('"').strip("'")
+                return val
+    except Exception:
+        pass
+    return ""
+
+
 def _bool(key: str, default: bool = False) -> bool:
     val = _str(key).lower()
     if val in ("1", "true", "yes"):
@@ -26,8 +42,8 @@ def _bool(key: str, default: bool = False) -> bool:
 # Database
 DATABASE_URL = _str("DATABASE_URL") or "sqlite:///./doorbell.db"
 
-# Angi webhook
-ANGI_API_KEY = _str("ANGI_API_KEY")
+# Angi webhook (prefer project .env over shell so project key always wins)
+ANGI_API_KEY = _angi_api_key_from_project_env() or _str("ANGI_API_KEY")
 
 
 # SendGrid (optional)
