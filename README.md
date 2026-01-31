@@ -110,7 +110,7 @@ Expected response: `200` with body `<success>ok</success>`.
 - **Default**: SQLite file `doorbell.db` in the project root (same directory as `uvicorn` is run from).
 - **Postgres**: Set `DATABASE_URL=postgresql://user:pass@host:5432/dbname`.
 
-Tables are created on startup via `init_db()` (no Alembic). To inspect SQLite:
+Tables are created on startup via `init_db()` (no Alembic). To inspect tables, open the DB with the SQLite CLI: `sqlite3 doorbell.db`. Inside the prompt, use `.tables` to list tables, `.schema` (or `.schema <table>`) to show definitions, and run `SELECT * FROM <table>;` to view rows (use `.headers on` and `.mode column` for readable output).
 
 ```bash
 sqlite3 doorbell.db
