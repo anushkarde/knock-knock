@@ -127,9 +127,11 @@ sqlite3 doorbell.db
 
 Seeded demo mappings:
 
-- `ALAccountId` **123456** → `tenant_bob_plumbing` (bob@example.com)
-- `ALAccountId` **999999** → `tenant_alice_hvac` (alice@example.com)
+- `ALAccountId` **123456** → `tenant_bob_plumbing` (anushkad@stanford.edu)
+- `ALAccountId` **999999** → `tenant_alice_hvac` (anushkad@stanford.edu)
 - Any other or missing `ALAccountId` → `tenant_default`
+
+Emails can only be sent from verified sender emails via SendGrid. For the purposes of the demo, this is why I set the emails of both tenants to anushkad@stanford.edu
 
 ---
 
